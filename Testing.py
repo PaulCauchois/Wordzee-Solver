@@ -1,68 +1,68 @@
-import random
 from methods import *
+import os
 
-
-def create_game():
-    bonuses = ['LD', 'LD', 'LD', 'LT', 'LT']
-    random.shuffle(bonuses)
-    board = []
-    for i in range(3, 8):
-        row = [bonuses[i - 3]] + ['' for _ in range(i - 2)]
-        if i <= 5:
-            row.append('')
-            random.shuffle(row)
-        elif i == 6:
-            random.shuffle(row)
-            row.append('MD')
-        else:
-            random.shuffle(row)
-            row.append('MT')
-        board.append(row)
-    return board
-
-
-def play_game(method, param1, param2=None):
-    board = create_game()
+logdir = os.getcwd()+"/logs"
+player = Wordzee("French ODS dictionary.txt", "letters.txt")
+method = player.probabilistic_search
+# Number of files in log folder
+n = len([entry for entry in os.listdir(logdir) if os.path.isfile(os.path.join(logdir, entry)) and entry.startswith(method.__name__)])+1
+param1 = 1
+param2 = None
+for testnum in range(1):
+    f = open(os.path.join(logdir, method.__name__+str(n+testnum)+'.txt'), 'w')
+    f.write(f"\tSimulation #{n+testnum}\n")
+    f.write(f"{method.__code__.co_varnames[1]} : {param1}\n")
+    f.write(f"board :\n")
+    player.create_board()
+    for row in player.board:
+        f.write(f"{'|'.join([case if case != '' else '  ' for case in row])}|\n")
     plays = []
     points = 0
+    by_line = []
     wordzee = True
-    for row in board:
+    for i, row in enumerate(player.board):
+        f.write("----------\n")
+        f.write(f"\tRound {i+1}\n")
         print(f"Playing round {row}")
         k = len(row)
-        letters = swap_letters('', 7)
-        print(f"Letters are {letters}")
-        for _ in range(2):
+        player.cases = row
+        player.swap_letters('', inPlace=True)
+        print(f"Letters are {player.letters}")
+        f.write(f"Starting letters : |{'|'.join(player.letters)}|\n")
+        for l in range(2):
             if param2:
-                kept = method(letters, row, words, param1, param2)
+                kept = method(param1, param2)
             else:
-                kept = method(letters, row, words, param1)
+                kept = method(param1)
             print(f"Keeping {kept}")
-            letters = swap_letters(kept,7)
-            print(f"New letters are {letters}")
-        P = words_containing(letters, words, row)
+            player.swap_letters(kept)
+            print(f"New letters are {player.letters}")
+            f.write(f"Swap {l+1} :           |{'|'.join(player.letters)}|\n")
+        P = player.words_containing(player.letters, row)
         played = max(P.keys(), key=P.get)
-        print(f"Playing {played} for {P[played]} points")
-        points += P[played]
         if len(played) < k:
             wordzee = False
-            plays.append(list(played) + (k - len(played)) * [''])
+            plays.append(list(played) + (k - len(played)) * [' '])
         else:
             plays.append(list(played))
+            P[played] -= player.full_bonus
+        P[played] *= i+1
+        print(f"Playing {played} for {P[played]} points")
+        print(played)
+        f.write(f"{' |'.join(plays[-1])} | {P[played]}\n")
+        f.write(f"{'|'.join([case if case != '' else '  ' for case in row])}|\n")
+        points += P[played]
+        by_line.append(P[played])
         print("-----------")
     if wordzee:
         points += 100
         print("Wordzee !")
-    return plays, points
 
+    f.write(f"----------\n")
+    for i,p in enumerate(plays):
+        f.write(f"{'|'.join(p)}| {'  '*(player.max_letters-len(p))} |{by_line[i]}|\n")
 
-words = {}
-f = open("French ODS dictionary.txt")
-for line in iter(f.readline, ''):
-    if len(line) in (4, 5, 6, 7, 8):
-        lw = line[:-1].lower()
-        words[lw] = Counter(lw)
+    print(plays)
+    print(points)
 
-A,B = play_game(exhaustive_search,3)
-
-print(A)
-print(B)
+    f.close()
