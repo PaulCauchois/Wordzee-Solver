@@ -11,7 +11,11 @@ for file in os.listdir(logdir):
         r = f.readlines()
         try:
             points.append(int(r[-1][13:]))
+            if points[-1] > 900 :
+                print(file)
         except ValueError:
+            print(f"Invalid value encountered in {file}, moving on...")
+        except IndexError:
             print(f"Invalid value encountered in {file}, moving on...")
 
 param1 = int(r[1][4:])
