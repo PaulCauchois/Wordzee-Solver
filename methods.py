@@ -12,12 +12,28 @@ class Wordzee:
 
         # Opening dictionary
 
-        self.words = {}
+        self.words3 = {}
+        self.words4 = {}
+        self.words5 = {}
+        self.words6 = {}
+        self.words7 = {}
+        self.words = [self.words3, self.words4, self.words5, self.words6, self.words7]
         f = open(wordfile)
         for line in iter(f.readline, ''):
             if len(line) in (4, 5, 6, 7, 8):
                 lw = line[:-1].lower()
-                self.words[lw] = Counter(lw)
+                match len(line):
+                    case 4:
+                        self.words3[lw] = Counter(lw)
+                    case 5:
+                        self.words4[lw] = Counter(lw)
+                    case 6:
+                        self.words5[lw] = Counter(lw)
+                    case 7:
+                        self.words6[lw] = Counter(lw)
+                    case 8:
+                        self.words7[lw] = Counter(lw)
+
 
         # Opening random letters
 
@@ -123,17 +139,30 @@ class Wordzee:
                 s += self.full_bonus
         return s
 
-    def words_containing(self, string, scoring=None):
+    def words_containing(self, string, scoring=None, min_words=1):
         l = {'': 0}
         C = Counter(string)
         if scoring:
-            for w in self.words:
-                if len(w) <= len(scoring) and self.words[w] <= C:
-                    l[w] = self.score(w, scoring)
+            n = len(scoring)
+            for bank in self.words[n-3::-1]:
+                stop = False
+                for w in bank:
+                    if bank[w] <= C:
+                        l[w] = self.score(w, scoring)
+                        if len(l) >= min_words :
+                            stop = True
+                if stop:
+                    break
         else:
-            for w in self.words:
-                if self.words[w] <= C:
-                    l[w] = self.score(w)
+            n = len(string)
+            for bank in self.words[n-3::-1]:
+                stop = False
+                for w in bank:
+                    if bank[w] <= C:
+                        l[w] = self.score(w)
+                        stop = True
+                if stop:
+                    break
         return l
 
     def swap_letters(self, kept, inPlace=True):
@@ -188,7 +217,7 @@ class Wordzee:
         return best
 
     def KPPV_search(self, k, seuil):
-        results = self.words_containing(self.letters, self.cases)
+        results = self.words_containing(self.letters, self.cases, min_words=k)
         l = min(len(results), k)
         filtered = sorted(results.keys(), key=results.get, reverse=True)[:l]
         total = sum([results[w] for w in filtered])
