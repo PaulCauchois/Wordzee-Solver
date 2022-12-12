@@ -1,10 +1,10 @@
 from methods import *
-import time
 import os
 
-logdir = os.getcwd() + "/logs"
 player = Wordzee("French ODS dictionary.txt", "letters.txt")
+
 method = player.KPPV_search
+logdir = os.getcwd() + "/logs/" + method.__name__
 # Number of files in log folder
 n = len([entry for entry in os.listdir(logdir) if
          os.path.isfile(os.path.join(logdir, entry)) and entry.startswith(method.__name__)]) + 1
@@ -12,7 +12,7 @@ v = 0
 b = 0
 param1 = 5
 param2 = 0.5
-for testnum in range(9000):
+for testnum in range(10000):
     f = open(os.path.join(logdir, method.__name__ + '_' + str(n + testnum) + '.txt'), 'w')
     f.write(f"\tSimulation #{n + testnum}\n")
     f.write(f"{method.__code__.co_varnames[1]} : {param1}\n")
@@ -45,7 +45,6 @@ for testnum in range(9000):
             player.swap_letters(kept)
             print(f"New letters are {player.letters}")
             f.write(f"Swap {l + 1} :           |{'|'.join(player.letters)}|\n")
-        s = time.time()
         P = player.words_containing(player.letters, row)
         played = max(P.keys(), key=P.get)
         if len(played) < k:

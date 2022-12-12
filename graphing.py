@@ -1,15 +1,18 @@
 from matplotlib import pyplot as plt
 import os
 
-logdir = os.getcwd() + "/logs"
 num_params = 2
 plot_method = "KPPV_search"
+logdir = os.getcwd() + "/logs/" + plot_method
 points = []
 for file in os.listdir(logdir):
     if file.startswith(plot_method):
         f = open(os.path.join(logdir, file), 'r')
         r = f.readlines()
-        points.append(int(r[-1][13:]))
+        try:
+            points.append(int(r[-1][13:]))
+        except ValueError:
+            print(f"Invalid value encountered in {file}, moving on...")
 
 param1 = int(r[1][4:])
 if num_params == 2:
