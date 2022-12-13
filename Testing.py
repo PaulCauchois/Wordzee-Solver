@@ -4,15 +4,14 @@ import os
 player = Wordzee("French ODS dictionary.txt", "letters.txt")
 
 method = player.KPPV_search
-logdir = os.getcwd() + "/logs/" + method.__name__
+logdir = "D://Wordzee/logs/" + method.__name__
 # Number of files in log folder
 n = len([entry for entry in os.listdir(logdir) if
          os.path.isfile(os.path.join(logdir, entry)) and entry.startswith(method.__name__)]) + 1
-v = 0
-b = 0
+
 param1 = 5
 param2 = 0.5
-for testnum in range(10000):
+for testnum in range(200001-n+1):
     f = open(os.path.join(logdir, method.__name__ + '_' + str(n + testnum) + '.txt'), 'w')
     f.write(f"\tSimulation #{n + testnum}\n")
     f.write(f"{method.__code__.co_varnames[1]} : {param1}\n")

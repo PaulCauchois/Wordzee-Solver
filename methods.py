@@ -1,4 +1,5 @@
 from collections import Counter
+from functools import reduce
 import random
 import itertools
 
@@ -33,7 +34,6 @@ class Wordzee:
                         self.words6[lw] = Counter(lw)
                     case 8:
                         self.words7[lw] = Counter(lw)
-
 
         # Opening random letters
 
@@ -144,18 +144,18 @@ class Wordzee:
         C = Counter(string)
         if scoring:
             n = len(scoring)
-            for bank in self.words[n-3::-1]:
+            for bank in self.words[n - 3::-1]:
                 stop = False
                 for w in bank:
                     if bank[w] <= C:
                         l[w] = self.score(w, scoring)
-                        if len(l) >= min_words :
+                        if len(l) >= min_words:
                             stop = True
                 if stop:
                     break
         else:
             n = len(string)
-            for bank in self.words[n-3::-1]:
+            for bank in self.words[n - 3::-1]:
                 stop = False
                 for w in bank:
                     if bank[w] <= C:
@@ -207,7 +207,9 @@ class Wordzee:
                 if new_string in tested:
                     s += tested[new_string]
                 else:
-                    b = max(self.words_containing(new_string, self.cases).values())
+                    b = max(self.words_containing(new_string, self.cases).values()) * reduce(lambda x, y: x * y,
+                                                                                             map(self.scores.get,
+                                                                                                 added), 1)
                     s += b
                     tested[new_string] = b
             averages[root] = s / (26 ** k)
