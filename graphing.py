@@ -32,8 +32,8 @@ bin_heights = [0 for _ in bins]
 for file in os.listdir(logdir):
     if (filename := file[:-4]) in simuls:
         p = simuls[filename]["points"]
-        points.append(simuls[filename])
-        bin_heights[simuls[filename] // bin_length] += 1
+        points.append(simuls[filename]["points"])
+        bin_heights[simuls[filename]["points"] // bin_length] += 1
     elif file.startswith(plot_method):
         if filename.endswith("000"):
             print(filename)
